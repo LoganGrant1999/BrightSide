@@ -1,0 +1,374 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:brightside/features/metro/metro.dart';
+import 'package:brightside/features/metro/metro_provider.dart';
+import 'package:brightside/features/story/providers/story_providers.dart';
+import 'package:brightside/features/auth/providers/auth_provider.dart';
+import 'package:brightside/core/theme/app_theme.dart';
+import 'package:brightside/core/utils/ui.dart';
+
+class SettingsScreen extends ConsumerStatefulWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  bool _useDeviceLocation = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final metroState = ref.watch(metroProvider);
+    final authState = ref.watch(authProvider);
+    final isSignedIn = authState.status == AuthStatus.signedIn;
+    final user = authState.user;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Settings'),
+      ),
+      body: ListView(
+        children: [
+          // Account section
+          _buildSectionHeader(context, 'Account'),
+          if (isSignedIn && user != null)
+            ListTile(
+              leading: CircleAvatar(
+                backgroundColor: AppTheme.primaryColor,
+                backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                child: user.photoUrl == null
+                    ? const Icon(Icons.person, color: Colors.white)
+                    : null,
+              ),
+              title: Text(user.displayName ?? user.email ?? 'User'),
+              subtitle: Text(user.email ?? 'Signed in with ${user.provider.name}'),
+              trailing: TextButton(
+                onPressed: () async {
+                  await ref.read(authProvider.notifier).signOut();
+                },
+                child: const Text('Sign Out'),
+              ),
+            )
+          else
+            ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: AppTheme.primaryColor,
+                child: Icon(Icons.person, color: Colors.white),
+              ),
+              title: const Text('Guest User'),
+              subtitle: const Text('Sign in to save preferences across devices'),
+              trailing: TextButton(
+                onPressed: () {
+                  _showComingSoonDialog(context, 'Authentication');
+                },
+                child: const Text('Sign In'),
+              ),
+            ),
+          const Divider(),
+
+          // Location section
+          _buildSectionHeader(context, 'Location'),
+          ListTile(
+            leading: const Icon(Icons.location_city),
+            title: const Text('Current Metro'),
+            subtitle: Text(metroState.metro.toString()),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _showMetroSelector(context);
+            },
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.my_location),
+            title: const Text('Use Device Location'),
+            subtitle: const Text('Automatically set metro based on your location'),
+            value: _useDeviceLocation,
+            onChanged: (value) async {
+              if (value) {
+                // Request location permission and set metro
+                await ref.read(metroProvider.notifier).setFromLocation();
+                setState(() {
+                  _useDeviceLocation = true;
+                });
+                if (mounted) {
+                  UIHelpers.showSuccessSnackBar(
+                    context,
+                    'Metro updated based on your location',
+                  );
+                }
+              } else {
+                setState(() {
+                  _useDeviceLocation = false;
+                });
+              }
+            },
+          ),
+          const Divider(),
+
+          // Legal section
+          _buildSectionHeader(context, 'Legal'),
+          ListTile(
+            leading: const Icon(Icons.description),
+            title: const Text('Terms of Service'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _showComingSoonDialog(context, 'Terms of Service');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip),
+            title: const Text('Privacy Policy'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _showComingSoonDialog(context, 'Privacy Policy');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.gavel),
+            title: const Text('Content Policy'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _showComingSoonDialog(context, 'Content Policy');
+            },
+          ),
+          const Divider(),
+
+          // Developer section
+          _buildSectionHeader(context, 'Developer'),
+          if (isSignedIn)
+            ListTile(
+              leading: const Icon(Icons.person_remove, color: AppTheme.errorColor),
+              title: const Text(
+                'Delete Account',
+                style: TextStyle(color: AppTheme.errorColor),
+              ),
+              subtitle: const Text('Permanently delete your account and all data'),
+              onTap: () {
+                _showDeleteAccountConfirmation(context);
+              },
+            ),
+          ListTile(
+            leading: const Icon(Icons.delete_forever, color: AppTheme.errorColor),
+            title: const Text(
+              'Delete Local Data',
+              style: TextStyle(color: AppTheme.errorColor),
+            ),
+            subtitle: const Text('Clear all locally stored data and preferences'),
+            onTap: () {
+              _showDeleteDataConfirmation(context);
+            },
+          ),
+          const Divider(),
+
+          // App info
+          _buildSectionHeader(context, 'About'),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: const Text('Version'),
+            subtitle: const Text('1.0.0'),
+          ),
+          const SizedBox(height: AppTheme.paddingLarge),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppTheme.paddingMedium,
+        AppTheme.paddingLarge,
+        AppTheme.paddingMedium,
+        AppTheme.paddingSmall,
+      ),
+      child: Text(
+        title.toUpperCase(),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: AppTheme.primaryColor,
+              fontWeight: FontWeight.bold,
+            ),
+      ),
+    );
+  }
+
+  void _showMetroSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(AppTheme.paddingMedium),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select Metro',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: AppTheme.paddingMedium),
+            ...kMetros.map((metro) {
+              final metroState = ref.watch(metroProvider);
+              final isSelected = metro.id == metroState.metroId;
+              return ListTile(
+                leading: Icon(
+                  isSelected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: isSelected
+                      ? AppTheme.primaryColor
+                      : AppTheme.textSecondaryColor,
+                ),
+                title: Text(metro.name),
+                subtitle: Text(metro.state),
+                selected: isSelected,
+                onTap: () async {
+                  await ref.read(metroProvider.notifier).setFromPicker(metro.id);
+                  setState(() {
+                    _useDeviceLocation = false;
+                  });
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteAccountConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'This will permanently delete your account and all associated data:\n\n'
+          '• Your account and profile\n'
+          '• Story submissions and likes\n'
+          '• All preferences\n\n'
+          'This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _deleteAccount();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppTheme.errorColor,
+            ),
+            child: const Text('Delete Account'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteDataConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Local Data'),
+        content: const Text(
+          'This will clear all locally stored data including:\n\n'
+          '• Your metro preference\n'
+          '• Story likes\n'
+          '• User ID\n\n'
+          'This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _deleteLocalData();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppTheme.errorColor,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteAccount() async {
+    try {
+      await ref.read(authProvider.notifier).deleteAccount();
+
+      if (mounted) {
+        UIHelpers.showSuccessSnackBar(
+          context,
+          'Account deleted successfully',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        UIHelpers.handleError(context, e);
+      }
+    }
+  }
+
+  Future<void> _deleteLocalData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      if (mounted) {
+        UIHelpers.showSuccessSnackBar(
+          context,
+          'Local data deleted. Please restart the app.',
+          duration: const Duration(seconds: 4),
+        );
+
+        // Reset state
+        setState(() {
+          _useDeviceLocation = false;
+        });
+
+        // Invalidate all providers to force refresh
+        ref.invalidate(metroProvider);
+        ref.invalidate(storyRepositoryProvider);
+        ref.invalidate(todayStoriesProvider);
+        ref.invalidate(popularStoriesProvider);
+        ref.invalidate(likesControllerProvider);
+      }
+    } catch (e) {
+      if (mounted) {
+        UIHelpers.handleError(context, e);
+      }
+    }
+  }
+
+  void _showComingSoonDialog(BuildContext context, String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(feature),
+        content: Text('$feature will be available in a future update.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+}
