@@ -120,27 +120,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // Legal section
           _buildSectionHeader(context, 'Legal'),
           ListTile(
-            leading: const Icon(Icons.description),
-            title: const Text('Terms of Service'),
+            leading: const Icon(Icons.policy),
+            title: const Text('Legal Information'),
+            subtitle: const Text('Privacy, terms, and content policy'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              _showComingSoonDialog(context, 'Terms of Service');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.privacy_tip),
-            title: const Text('Privacy Policy'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              _showComingSoonDialog(context, 'Privacy Policy');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.gavel),
-            title: const Text('Content Policy'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              _showComingSoonDialog(context, 'Content Policy');
+              context.push('/settings/legal');
             },
           ),
           const Divider(),
@@ -362,21 +347,4 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  void _showComingSoonDialog(BuildContext context, String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(feature),
-        content: Text('$feature will be available in a future update.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -33,6 +33,8 @@ class Story with _$Story {
     String? subhead,
     String? body,
     String? imageUrl,
+    String? sourceName,
+    String? sourceUrl,
     @Default([]) List<String> sourceLinks,
     @Default(0) int likesCount,
     required DateTime createdAt,

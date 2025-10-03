@@ -28,6 +28,8 @@ mixin _$Story {
   String? get subhead => throw _privateConstructorUsedError;
   String? get body => throw _privateConstructorUsedError;
   String? get imageUrl => throw _privateConstructorUsedError;
+  String? get sourceName => throw _privateConstructorUsedError;
+  String? get sourceUrl => throw _privateConstructorUsedError;
   List<String> get sourceLinks => throw _privateConstructorUsedError;
   int get likesCount => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
@@ -56,6 +58,8 @@ abstract class $StoryCopyWith<$Res> {
     String? subhead,
     String? body,
     String? imageUrl,
+    String? sourceName,
+    String? sourceUrl,
     List<String> sourceLinks,
     int likesCount,
     DateTime createdAt,
@@ -86,6 +90,8 @@ class _$StoryCopyWithImpl<$Res, $Val extends Story>
     Object? subhead = freezed,
     Object? body = freezed,
     Object? imageUrl = freezed,
+    Object? sourceName = freezed,
+    Object? sourceUrl = freezed,
     Object? sourceLinks = null,
     Object? likesCount = null,
     Object? createdAt = null,
@@ -121,6 +127,14 @@ class _$StoryCopyWithImpl<$Res, $Val extends Story>
             imageUrl: freezed == imageUrl
                 ? _value.imageUrl
                 : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            sourceName: freezed == sourceName
+                ? _value.sourceName
+                : sourceName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            sourceUrl: freezed == sourceUrl
+                ? _value.sourceUrl
+                : sourceUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
             sourceLinks: null == sourceLinks
                 ? _value.sourceLinks
@@ -164,6 +178,8 @@ abstract class _$$StoryImplCopyWith<$Res> implements $StoryCopyWith<$Res> {
     String? subhead,
     String? body,
     String? imageUrl,
+    String? sourceName,
+    String? sourceUrl,
     List<String> sourceLinks,
     int likesCount,
     DateTime createdAt,
@@ -193,6 +209,8 @@ class __$$StoryImplCopyWithImpl<$Res>
     Object? subhead = freezed,
     Object? body = freezed,
     Object? imageUrl = freezed,
+    Object? sourceName = freezed,
+    Object? sourceUrl = freezed,
     Object? sourceLinks = null,
     Object? likesCount = null,
     Object? createdAt = null,
@@ -228,6 +246,14 @@ class __$$StoryImplCopyWithImpl<$Res>
         imageUrl: freezed == imageUrl
             ? _value.imageUrl
             : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        sourceName: freezed == sourceName
+            ? _value.sourceName
+            : sourceName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        sourceUrl: freezed == sourceUrl
+            ? _value.sourceUrl
+            : sourceUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
         sourceLinks: null == sourceLinks
             ? _value._sourceLinks
@@ -265,6 +291,8 @@ class _$StoryImpl implements _Story {
     this.subhead,
     this.body,
     this.imageUrl,
+    this.sourceName,
+    this.sourceUrl,
     final List<String> sourceLinks = const [],
     this.likesCount = 0,
     required this.createdAt,
@@ -289,6 +317,10 @@ class _$StoryImpl implements _Story {
   final String? body;
   @override
   final String? imageUrl;
+  @override
+  final String? sourceName;
+  @override
+  final String? sourceUrl;
   final List<String> _sourceLinks;
   @override
   @JsonKey()
@@ -310,7 +342,7 @@ class _$StoryImpl implements _Story {
 
   @override
   String toString() {
-    return 'Story(id: $id, metroId: $metroId, type: $type, title: $title, subhead: $subhead, body: $body, imageUrl: $imageUrl, sourceLinks: $sourceLinks, likesCount: $likesCount, createdAt: $createdAt, publishedAt: $publishedAt, status: $status)';
+    return 'Story(id: $id, metroId: $metroId, type: $type, title: $title, subhead: $subhead, body: $body, imageUrl: $imageUrl, sourceName: $sourceName, sourceUrl: $sourceUrl, sourceLinks: $sourceLinks, likesCount: $likesCount, createdAt: $createdAt, publishedAt: $publishedAt, status: $status)';
   }
 
   @override
@@ -326,6 +358,10 @@ class _$StoryImpl implements _Story {
             (identical(other.body, body) || other.body == body) &&
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
+            (identical(other.sourceName, sourceName) ||
+                other.sourceName == sourceName) &&
+            (identical(other.sourceUrl, sourceUrl) ||
+                other.sourceUrl == sourceUrl) &&
             const DeepCollectionEquality().equals(
               other._sourceLinks,
               _sourceLinks,
@@ -350,6 +386,8 @@ class _$StoryImpl implements _Story {
     subhead,
     body,
     imageUrl,
+    sourceName,
+    sourceUrl,
     const DeepCollectionEquality().hash(_sourceLinks),
     likesCount,
     createdAt,
@@ -380,6 +418,8 @@ abstract class _Story implements Story {
     final String? subhead,
     final String? body,
     final String? imageUrl,
+    final String? sourceName,
+    final String? sourceUrl,
     final List<String> sourceLinks,
     final int likesCount,
     required final DateTime createdAt,
@@ -403,6 +443,10 @@ abstract class _Story implements Story {
   String? get body;
   @override
   String? get imageUrl;
+  @override
+  String? get sourceName;
+  @override
+  String? get sourceUrl;
   @override
   List<String> get sourceLinks;
   @override

@@ -251,6 +251,47 @@ class _StoryCardState extends ConsumerState<StoryCard> {
 
                   const SizedBox(height: AppTheme.paddingMedium),
 
+                  // Source and time metadata
+                  Row(
+                    children: [
+                      if (widget.story.sourceName != null) ...[
+                        Icon(
+                          Icons.public,
+                          size: 14,
+                          color: AppTheme.textSecondaryColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            widget.story.sourceName!,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppTheme.textSecondaryColor,
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
+                      if (widget.story.publishedAt != null) ...[
+                        Icon(
+                          Icons.schedule,
+                          size: 14,
+                          color: AppTheme.textSecondaryColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _formatTime(widget.story.publishedAt!),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppTheme.textSecondaryColor,
+                              ),
+                        ),
+                      ],
+                    ],
+                  ),
+
+                  const SizedBox(height: AppTheme.paddingMedium),
+
                   // Actions row (like button and count)
                   Row(
                     children: [
@@ -355,6 +396,21 @@ class _StoryCardState extends ConsumerState<StoryCard> {
         ),
       ),
     );
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m ago';
+    } else {
+      return 'Just now';
+    }
   }
 
   Widget _buildTypeBadge(StoryType type) {

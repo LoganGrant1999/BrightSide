@@ -187,9 +187,29 @@ class StoryDetailsScreen extends ConsumerWidget {
                   const SizedBox(height: AppTheme.paddingLarge),
                 ],
 
-                // Summary link special UI
+                // Read full story button (uses sourceUrl from source_url field)
+                if (story.sourceUrl != null && story.sourceUrl!.isNotEmpty) ...[
+                  const SizedBox(height: AppTheme.paddingMedium),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _launchUrl(story.sourceUrl!),
+                      icon: const Icon(Icons.open_in_new),
+                      label: const Text('Read full story'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.paddingLarge),
+                ],
+
+                // Summary link special UI (legacy support for sourceLinks)
                 if (story.type == StoryType.summaryLink &&
-                    story.sourceLinks.isNotEmpty) ...[
+                    story.sourceLinks.isNotEmpty &&
+                    (story.sourceUrl == null || story.sourceUrl!.isEmpty)) ...[
                   const SizedBox(height: AppTheme.paddingMedium),
                   // Prominent "Read at Source" button
                   SizedBox(

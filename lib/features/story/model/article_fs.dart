@@ -19,6 +19,8 @@ class ArticleFs with _$ArticleFs {
     required String snippet,
     required String body,
     String? imageUrl,
+    String? sourceName,
+    String? sourceUrl,
     required String authorUid,
     required String authorName,
     String? authorPhotoURL,

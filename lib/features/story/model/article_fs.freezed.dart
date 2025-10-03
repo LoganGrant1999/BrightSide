@@ -29,6 +29,8 @@ mixin _$ArticleFs {
   String get snippet => throw _privateConstructorUsedError;
   String get body => throw _privateConstructorUsedError;
   String? get imageUrl => throw _privateConstructorUsedError;
+  String? get sourceName => throw _privateConstructorUsedError;
+  String? get sourceUrl => throw _privateConstructorUsedError;
   String get authorUid => throw _privateConstructorUsedError;
   String get authorName => throw _privateConstructorUsedError;
   String? get authorPhotoURL => throw _privateConstructorUsedError;
@@ -62,6 +64,8 @@ abstract class $ArticleFsCopyWith<$Res> {
     String snippet,
     String body,
     String? imageUrl,
+    String? sourceName,
+    String? sourceUrl,
     String authorUid,
     String authorName,
     String? authorPhotoURL,
@@ -96,6 +100,8 @@ class _$ArticleFsCopyWithImpl<$Res, $Val extends ArticleFs>
     Object? snippet = null,
     Object? body = null,
     Object? imageUrl = freezed,
+    Object? sourceName = freezed,
+    Object? sourceUrl = freezed,
     Object? authorUid = null,
     Object? authorName = null,
     Object? authorPhotoURL = freezed,
@@ -138,6 +144,14 @@ class _$ArticleFsCopyWithImpl<$Res, $Val extends ArticleFs>
             imageUrl: freezed == imageUrl
                 ? _value.imageUrl
                 : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            sourceName: freezed == sourceName
+                ? _value.sourceName
+                : sourceName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            sourceUrl: freezed == sourceUrl
+                ? _value.sourceUrl
+                : sourceUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
             authorUid: null == authorUid
                 ? _value.authorUid
@@ -195,6 +209,8 @@ abstract class _$$ArticleFsImplCopyWith<$Res>
     String snippet,
     String body,
     String? imageUrl,
+    String? sourceName,
+    String? sourceUrl,
     String authorUid,
     String authorName,
     String? authorPhotoURL,
@@ -228,6 +244,8 @@ class __$$ArticleFsImplCopyWithImpl<$Res>
     Object? snippet = null,
     Object? body = null,
     Object? imageUrl = freezed,
+    Object? sourceName = freezed,
+    Object? sourceUrl = freezed,
     Object? authorUid = null,
     Object? authorName = null,
     Object? authorPhotoURL = freezed,
@@ -270,6 +288,14 @@ class __$$ArticleFsImplCopyWithImpl<$Res>
         imageUrl: freezed == imageUrl
             ? _value.imageUrl
             : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        sourceName: freezed == sourceName
+            ? _value.sourceName
+            : sourceName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        sourceUrl: freezed == sourceUrl
+            ? _value.sourceUrl
+            : sourceUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
         authorUid: null == authorUid
             ? _value.authorUid
@@ -320,6 +346,8 @@ class _$ArticleFsImpl implements _ArticleFs {
     required this.snippet,
     required this.body,
     this.imageUrl,
+    this.sourceName,
+    this.sourceUrl,
     required this.authorUid,
     required this.authorName,
     this.authorPhotoURL,
@@ -350,6 +378,10 @@ class _$ArticleFsImpl implements _ArticleFs {
   @override
   final String? imageUrl;
   @override
+  final String? sourceName;
+  @override
+  final String? sourceUrl;
+  @override
   final String authorUid;
   @override
   final String authorName;
@@ -371,7 +403,7 @@ class _$ArticleFsImpl implements _ArticleFs {
 
   @override
   String toString() {
-    return 'ArticleFs(id: $id, metroId: $metroId, state: $state, city: $city, title: $title, snippet: $snippet, body: $body, imageUrl: $imageUrl, authorUid: $authorUid, authorName: $authorName, authorPhotoURL: $authorPhotoURL, likeCount: $likeCount, featured: $featured, featuredAt: $featuredAt, publishedAt: $publishedAt, status: $status)';
+    return 'ArticleFs(id: $id, metroId: $metroId, state: $state, city: $city, title: $title, snippet: $snippet, body: $body, imageUrl: $imageUrl, sourceName: $sourceName, sourceUrl: $sourceUrl, authorUid: $authorUid, authorName: $authorName, authorPhotoURL: $authorPhotoURL, likeCount: $likeCount, featured: $featured, featuredAt: $featuredAt, publishedAt: $publishedAt, status: $status)';
   }
 
   @override
@@ -388,6 +420,10 @@ class _$ArticleFsImpl implements _ArticleFs {
             (identical(other.body, body) || other.body == body) &&
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
+            (identical(other.sourceName, sourceName) ||
+                other.sourceName == sourceName) &&
+            (identical(other.sourceUrl, sourceUrl) ||
+                other.sourceUrl == sourceUrl) &&
             (identical(other.authorUid, authorUid) ||
                 other.authorUid == authorUid) &&
             (identical(other.authorName, authorName) ||
@@ -417,6 +453,8 @@ class _$ArticleFsImpl implements _ArticleFs {
     snippet,
     body,
     imageUrl,
+    sourceName,
+    sourceUrl,
     authorUid,
     authorName,
     authorPhotoURL,
@@ -451,6 +489,8 @@ abstract class _ArticleFs implements ArticleFs {
     required final String snippet,
     required final String body,
     final String? imageUrl,
+    final String? sourceName,
+    final String? sourceUrl,
     required final String authorUid,
     required final String authorName,
     final String? authorPhotoURL,
@@ -480,6 +520,10 @@ abstract class _ArticleFs implements ArticleFs {
   String get body;
   @override
   String? get imageUrl;
+  @override
+  String? get sourceName;
+  @override
+  String? get sourceUrl;
   @override
   String get authorUid;
   @override

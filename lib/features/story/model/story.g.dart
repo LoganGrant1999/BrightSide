@@ -14,6 +14,8 @@ _$StoryImpl _$$StoryImplFromJson(Map<String, dynamic> json) => _$StoryImpl(
   subhead: json['subhead'] as String?,
   body: json['body'] as String?,
   imageUrl: json['imageUrl'] as String?,
+  sourceName: json['sourceName'] as String?,
+  sourceUrl: json['sourceUrl'] as String?,
   sourceLinks:
       (json['sourceLinks'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -36,6 +38,8 @@ Map<String, dynamic> _$$StoryImplToJson(_$StoryImpl instance) =>
       'subhead': instance.subhead,
       'body': instance.body,
       'imageUrl': instance.imageUrl,
+      'sourceName': instance.sourceName,
+      'sourceUrl': instance.sourceUrl,
       'sourceLinks': instance.sourceLinks,
       'likesCount': instance.likesCount,
       'createdAt': instance.createdAt.toIso8601String(),

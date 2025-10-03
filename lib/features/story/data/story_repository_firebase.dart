@@ -175,6 +175,8 @@ class StoryRepositoryFirebase implements StoryRepository {
       subhead: article.snippet,
       body: article.body,
       imageUrl: article.imageUrl,
+      sourceName: article.sourceName,
+      sourceUrl: article.sourceUrl,
       sourceLinks: const [],
       likesCount: article.likeCount,
       createdAt: article.publishedAt,
