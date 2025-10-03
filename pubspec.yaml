@@ -63,12 +63,17 @@ dependencies:
   # Internationalization
   intl: ^0.20.1
 
+  # Package info
+  package_info_plus: ^8.1.0
+
   # Firebase
   firebase_core: ^3.6.0
   cloud_firestore: ^5.4.4
   firebase_auth: ^5.3.2
   firebase_storage: ^12.3.3
   cloud_functions: ^5.1.3
+  firebase_messaging: ^15.1.4
+  firebase_analytics: ^11.3.4
 
   # Auth providers
   google_sign_in: ^6.2.2

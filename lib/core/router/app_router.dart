@@ -10,6 +10,7 @@ import '../../features/auth/presentation/auth_gate_page.dart';
 import '../../features/auth/presentation/email_auth_page.dart';
 import '../../features/auth/presentation/account_page.dart';
 import '../../features/auth/providers/auth_provider.dart';
+import '../../features/notifications/presentation/notification_settings_page.dart';
 
 // Helper class to notify GoRouter when onboarding or auth state changes
 class _AppRefreshNotifier extends ChangeNotifier {
@@ -173,6 +174,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/settings',
         name: 'settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/settings/notifications',
+        name: 'settings-notifications',
+        builder: (context, state) => const NotificationSettingsPage(),
       ),
     ],
   );
