@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,6 +6,7 @@ import 'package:brightside/features/metro/metro.dart';
 import 'package:brightside/features/metro/metro_provider.dart';
 import 'package:brightside/features/story/providers/story_providers.dart';
 import 'package:brightside/features/auth/providers/auth_provider.dart';
+import 'package:brightside/shared/services/functions_service.dart';
 import 'package:brightside/core/theme/app_theme.dart';
 import 'package:brightside/core/utils/ui.dart';
 
@@ -136,6 +138,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           // Developer section
           _buildSectionHeader(context, 'Developer'),
+          // Debug-only: Fix seed data for current metro
+          if (kDebugMode)
+            ListTile(
+              leading: const Icon(Icons.build),
+              title: const Text('[DEBUG] Fix seed for current metro'),
+              subtitle: const Text('Bump publishedAt & ensure status=published'),
+              onTap: () async {
+                await _handleFixSeedForMetro(context);
+              },
+            ),
           if (isSignedIn)
             ListTile(
               leading: const Icon(Icons.person_remove, color: AppTheme.errorColor),
@@ -236,6 +248,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  /// Handle fix seed for current metro (debug only)
+  Future<void> _handleFixSeedForMetro(BuildContext context) async {
+    final metroState = ref.read(metroProvider);
+    final metroId = metroState.metroId;
+
+    // TODO: Move token to a safer dev-only config or environment variable
+    const devToken = 'YOUR_LONG_RANDOM_TOKEN';
+
+    try {
+      if (context.mounted) {
+        UIHelpers.showInfoSnackBar(context, 'Running backfill for $metroId...');
+      }
+
+      final svc = ref.read(functionsServiceProvider);
+      final count = await svc.fixSeedForMetro(
+        metroId: metroId,
+        token: devToken,
+        limit: 25,
+      );
+
+      // Invalidate story providers to refresh
+      ref.invalidate(todayStoriesProvider);
+      ref.invalidate(popularStoriesProvider);
+
+      if (context.mounted) {
+        UIHelpers.showSuccessSnackBar(
+          context,
+          'Updated $count articles for $metroId',
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        UIHelpers.showErrorSnackBar(context, 'Backfill failed: $e');
+      }
+    }
   }
 
   void _showDeleteAccountConfirmation(BuildContext context) {

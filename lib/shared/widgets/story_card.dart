@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:brightside/features/story/model/story.dart';
 import 'package:brightside/features/story/providers/story_providers.dart';
 import 'package:brightside/core/theme/app_theme.dart';
+import 'package:brightside/core/utils/ui.dart';
+
+export 'package:brightside/features/story/providers/story_providers.dart' show LikeBlockedFeaturedException;
 
 /// Shimmer loading skeleton for StoryCard
 class StoryCardSkeleton extends StatefulWidget {
@@ -152,7 +155,7 @@ class StoryListSkeleton extends StatelessWidget {
   }
 }
 
-class StoryCard extends ConsumerWidget {
+class StoryCard extends ConsumerStatefulWidget {
   final Story story;
 
   const StoryCard({
@@ -161,28 +164,41 @@ class StoryCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isLiked = ref.watch(isStoryLikedProvider(story.id));
+  ConsumerState<StoryCard> createState() => _StoryCardState();
+}
+
+class _StoryCardState extends ConsumerState<StoryCard> {
+  bool _isLiking = false;
+
+  @override
+  Widget build(BuildContext context) {
+    // Get live story data for real-time like counts
+    final liveStory = ref.watch(storyByIdProvider(widget.story.id)).maybeWhen(
+          data: (s) => s,
+          orElse: () => widget.story,
+        );
+
+    final isLiked = ref.watch(isStoryLikedProvider(widget.story.id));
     final likesController = ref.read(likesControllerProvider.notifier);
 
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          context.push('/story/${story.id}');
+          context.push('/story/${widget.story.id}');
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image
-            if (story.imageUrl != null)
+            if (widget.story.imageUrl != null)
               Semantics(
-                label: 'Story image for ${story.title}',
+                label: 'Story image for ${widget.story.title}',
                 image: true,
                 child: AspectRatio(
                   aspectRatio: 16 / 9,
                   child: CachedNetworkImage(
-                    imageUrl: story.imageUrl!,
+                    imageUrl: widget.story.imageUrl!,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(
                       color: AppTheme.surfaceColor,
@@ -209,22 +225,22 @@ class StoryCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Story type badge
-                  _buildTypeBadge(story.type),
+                  _buildTypeBadge(widget.story.type),
                   const SizedBox(height: AppTheme.paddingSmall),
 
                   // Title
                   Text(
-                    story.title,
+                    widget.story.title,
                     style: Theme.of(context).textTheme.headlineSmall,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
 
                   // Subhead
-                  if (story.subhead != null) ...[
+                  if (widget.story.subhead != null) ...[
                     const SizedBox(height: AppTheme.paddingSmall),
                     Text(
-                      story.subhead!,
+                      widget.story.subhead!,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AppTheme.textSecondaryColor,
                           ),
@@ -242,14 +258,40 @@ class StoryCard extends ConsumerWidget {
                       Semantics(
                         button: true,
                         label: isLiked ? 'Unlike story' : 'Like story',
-                        hint: '${story.likesCount} likes',
+                        hint: '${liveStory?.likesCount ?? widget.story.likesCount} likes',
                         child: InkWell(
-                          onTap: () async {
-                            await likesController.toggleLike(story.id);
-                            // Invalidate the story providers to refresh counts
-                            ref.invalidate(todayStoriesProvider);
-                            ref.invalidate(popularStoriesProvider);
-                          },
+                          onTap: _isLiking
+                              ? null
+                              : () async {
+                                  setState(() => _isLiking = true);
+
+                                  try {
+                                    await likesController.toggleLike(widget.story.id);
+                                    // Invalidate the story providers to refresh counts
+                                    ref.invalidate(todayStoriesProvider);
+                                    ref.invalidate(popularStoriesProvider);
+                                  } catch (e) {
+                                    if (e is LikeBlockedFeaturedException) {
+                                      if (mounted) {
+                                        UIHelpers.showInfoSnackBar(
+                                          context,
+                                          'Already featured — likes are paused.',
+                                        );
+                                      }
+                                    } else {
+                                      if (mounted) {
+                                        UIHelpers.showErrorSnackBar(
+                                          context,
+                                          'Failed to like story',
+                                        );
+                                      }
+                                    }
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() => _isLiking = false);
+                                    }
+                                  }
+                                },
                           borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -259,14 +301,23 @@ class StoryCard extends ConsumerWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
-                                  isLiked ? Icons.favorite : Icons.favorite_border,
-                                  color: isLiked ? Colors.red : AppTheme.textSecondaryColor,
-                                  size: 20,
-                                ),
+                                if (_isLiking)
+                                  const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                else
+                                  Icon(
+                                    isLiked ? Icons.favorite : Icons.favorite_border,
+                                    color: isLiked ? Colors.red : AppTheme.textSecondaryColor,
+                                    size: 20,
+                                  ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  '${story.likesCount}',
+                                  '${liveStory?.likesCount ?? widget.story.likesCount}',
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ],
@@ -277,9 +328,9 @@ class StoryCard extends ConsumerWidget {
                       const Spacer(),
 
                       // Source links indicator
-                      if (story.sourceLinks.isNotEmpty)
+                      if (widget.story.sourceLinks.isNotEmpty)
                         Semantics(
-                          label: '${story.sourceLinks.length} source links',
+                          label: '${widget.story.sourceLinks.length} source links',
                           child: Row(
                             children: [
                               Icon(
@@ -289,7 +340,7 @@ class StoryCard extends ConsumerWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '${story.sourceLinks.length}',
+                                '${widget.story.sourceLinks.length}',
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ],

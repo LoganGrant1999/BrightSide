@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:brightside/features/metro/metro.dart';
 import 'package:brightside/features/metro/metro_provider.dart';
 import 'package:brightside/features/story/model/story.dart';
 import 'package:brightside/features/story/providers/story_providers.dart';
+import 'package:brightside/shared/services/firebase_boot.dart';
 import 'package:brightside/core/theme/app_theme.dart';
 import 'package:brightside/core/utils/ui.dart';
 
@@ -32,7 +34,26 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
       setState(() {
         _selectedMetroId = metroState.metroId;
       });
+
+      // Ensure user is authenticated (anonymous if needed)
+      _ensureAuthenticated();
     });
+  }
+
+  Future<void> _ensureAuthenticated() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      try {
+        await FirebaseAuth.instance.signInAnonymously();
+      } catch (e) {
+        if (mounted) {
+          UIHelpers.showErrorSnackBar(
+            context,
+            'Authentication required to submit stories',
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -239,6 +260,22 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
       return;
     }
 
+    // Ensure user is authenticated
+    final uid = ref.read(userUidProvider);
+    if (uid == null) {
+      await _ensureAuthenticated();
+      final newUid = ref.read(userUidProvider);
+      if (newUid == null) {
+        if (mounted) {
+          UIHelpers.showErrorSnackBar(
+            context,
+            'Authentication required to submit stories',
+          );
+        }
+        return;
+      }
+    }
+
     setState(() {
       _isSubmitting = true;
     });
@@ -246,9 +283,12 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
     try {
       final repository = ref.read(storyRepositoryProvider);
 
+      // Generate unique submission ID
+      final submissionId = 'sub_${DateTime.now().millisecondsSinceEpoch}';
+
       // Create story draft
       final story = Story(
-        id: 'user_${DateTime.now().millisecondsSinceEpoch}',
+        id: submissionId,
         metroId: _selectedMetroId!,
         type: StoryType.user,
         title: _titleController.text.trim(),
@@ -260,7 +300,7 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
         status: StoryStatus.queued,
       );
 
-      // Submit to repository
+      // Submit to repository (will upload photo if local file path provided)
       await repository.submitUserStory(story);
 
       // Invalidate providers to refresh lists
@@ -268,10 +308,10 @@ class _SubmitScreenState extends ConsumerState<SubmitScreen> {
       ref.invalidate(popularStoriesProvider);
 
       if (mounted) {
-        // Show success snackbar
+        // Show success snackbar with submission ID
         UIHelpers.showSuccessSnackBar(
           context,
-          'Story submitted successfully!',
+          'Story submitted successfully! ID: $submissionId',
         );
 
         // Clear form

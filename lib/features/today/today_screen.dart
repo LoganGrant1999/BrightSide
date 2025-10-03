@@ -103,27 +103,32 @@ class TodayScreen extends ConsumerWidget {
 
   Widget _buildEmptyState(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.article_outlined,
-            size: 64,
-            color: AppTheme.textSecondaryColor,
-          ),
-          const SizedBox(height: AppTheme.paddingMedium),
-          Text(
-            'No stories today',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: AppTheme.paddingSmall),
-          Text(
-            'Check back later for new stories',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.textSecondaryColor,
-                ),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.paddingLarge),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.wb_sunny_outlined,
+              size: 64,
+              color: AppTheme.textSecondaryColor,
+            ),
+            const SizedBox(height: AppTheme.paddingMedium),
+            Text(
+              'No stories yet',
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppTheme.paddingSmall),
+            Text(
+              'Be the first to share a positive moment!',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondaryColor,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

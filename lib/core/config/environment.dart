@@ -8,8 +8,17 @@ enum Environment {
   /// Change this to switch between environments
   static const Environment current = Environment.development;
 
+  /// Whether to use Firebase repositories
+  static bool get useFirebase {
+    const env = String.fromEnvironment('BRIGHTSIDE_USE_FIREBASE', defaultValue: 'false');
+    return env.toLowerCase() == 'true';
+  }
+
   /// Whether to use mock repositories
   bool get useMockRepositories {
+    // If Firebase is enabled, don't use mocks
+    if (useFirebase) return false;
+
     return switch (this) {
       Environment.development => true,
       Environment.staging => false,

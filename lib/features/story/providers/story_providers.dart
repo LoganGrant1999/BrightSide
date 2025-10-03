@@ -1,10 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:brightside/features/story/model/story.dart';
 import 'package:brightside/features/story/data/story_repository.dart';
+import 'package:brightside/features/story/data/story_repository_firebase.dart';
 import 'package:brightside/features/story/data/http_story_repository.dart';
 import 'package:brightside/features/metro/metro_provider.dart';
 import 'package:brightside/shared/services/issue_cache.dart';
 import 'package:brightside/core/config/environment.dart';
+
+/// Exception thrown when attempting to like a featured article
+class LikeBlockedFeaturedException implements Exception {
+  const LikeBlockedFeaturedException();
+  @override
+  String toString() => 'LikeBlockedFeaturedException';
+}
 
 // Issue cache provider
 final issueCacheProvider = Provider<IssueCache>((ref) {
@@ -17,8 +25,10 @@ final issueCacheProvider = Provider<IssueCache>((ref) {
 final storyRepositoryProvider = Provider<StoryRepository>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
 
-  // Switch between Mock and HTTP repository based on environment
-  if (Environment.current.useMockRepositories) {
+  // Priority: Firebase > HTTP > Mock
+  if (Environment.useFirebase) {
+    return StoryRepositoryFirebase();
+  } else if (Environment.current.useMockRepositories) {
     return MockStoryRepository(prefs);
   } else {
     return HttpStoryRepository(prefs);
@@ -67,26 +77,19 @@ class LikesController extends StateNotifier<Map<String, bool>> {
 
   /// Toggle like for a story
   /// Returns the new like count for the story
+  /// Throws LikeBlockedFeaturedException if article is featured
   Future<int> toggleLike(String storyId) async {
-    // Optimistically update UI
+    // Call repository to persist the like (no optimistic update)
+    final newLikeCount = await _repository.like(storyId, _userId);
+
+    // Update state after successful API call
     final currentLikedState = state[storyId] ?? false;
     state = {
       ...state,
       storyId: !currentLikedState,
     };
 
-    try {
-      // Call repository to persist the like
-      final newLikeCount = await _repository.like(storyId, _userId);
-      return newLikeCount;
-    } catch (e) {
-      // Revert on error
-      state = {
-        ...state,
-        storyId: currentLikedState,
-      };
-      rethrow;
-    }
+    return newLikeCount;
   }
 
   /// Check if a story is liked by current user

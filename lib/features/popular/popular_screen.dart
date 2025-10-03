@@ -73,27 +73,32 @@ class PopularScreen extends ConsumerWidget {
 
   Widget _buildEmptyState(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.trending_up,
-            size: 64,
-            color: AppTheme.textSecondaryColor,
-          ),
-          const SizedBox(height: AppTheme.paddingMedium),
-          Text(
-            'No popular stories yet',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: AppTheme.paddingSmall),
-          Text(
-            'Stories will appear here as they gain likes',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.textSecondaryColor,
-                ),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.paddingLarge),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.wb_sunny_outlined,
+              size: 64,
+              color: AppTheme.textSecondaryColor,
+            ),
+            const SizedBox(height: AppTheme.paddingMedium),
+            Text(
+              'No stories yet',
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppTheme.paddingSmall),
+            Text(
+              'Be the first to share a positive moment!',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondaryColor,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

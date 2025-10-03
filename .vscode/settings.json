@@ -1,0 +1,16 @@
+{
+  "java.import.gradle.enabled": false,
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "java.import.exclusions": ["**/android/**", "**/.gradle/**", "**/build/**"],
+  "files.watcherExclude": {
+    "**/android/**": true,
+    "**/.gradle/**": true,
+    "**/build/**": true
+  },
+  "search.exclude": {
+    "**/android/**": true,
+    "**/.gradle/**": true,
+    "**/build/**": true
+  },
+  "dart.flutterRunAdditionalArgs": ["-d", "ios"]
+}
