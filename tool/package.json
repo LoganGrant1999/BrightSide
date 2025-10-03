@@ -2,6 +2,7 @@
   "name": "brightside-tools",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "seed": "ts-node seed_firestore.ts"
   },

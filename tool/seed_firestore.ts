@@ -12,9 +12,12 @@
 
 import admin from "firebase-admin";
 import { readFileSync, existsSync } from "fs";
-import { resolve } from "path";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 
 // Initialize Firebase Admin
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const serviceAccountPath = resolve(__dirname, "serviceAccountKey.json");
 
 if (!existsSync(serviceAccountPath)) {
