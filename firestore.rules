@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    function validateString(field, maxLen) {
+      return field is string && field.size() <= maxLen;
+    }
+
+    function validateTimestamp(field) {
+      return field is timestamp;
+    }
+
+    // /articles - read all, write admin/functions only
+    match /articles/{articleId} {
+      allow read: if true;
+      allow write: if false; // Only Cloud Functions and admin via console
+    }
+
+    // /submissions - users create, update own pending, read own
+    match /submissions/{submissionId} {
+      allow create: if isAuthenticated()
+        && request.resource.data.user_id == request.auth.uid
+        && validateString(request.resource.data.title, 200)
+        && validateString(request.resource.data.summary, 1000)
+        && validateString(request.resource.data.metro_id, 50)
+        && request.resource.data.status == "pending"
+        && validateTimestamp(request.resource.data.created_at);
+
+      allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+
+      allow update: if isAuthenticated()
+        && resource.data.user_id == request.auth.uid
+        && resource.data.status == "pending"
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.status == "pending";
+
+      // Admin/moderator writes via custom claims
+      allow write: if isAdmin();
+    }
+
+    // /users/{uid} - read/write only by that user
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      // /users/{uid}/devices subcollection
+      match /devices/{deviceId} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // /articleLikes/{uid_articleId} - create/delete own likes
+    match /articleLikes/{likeId} {
+      allow create: if isAuthenticated()
+        && request.resource.data.user_id == request.auth.uid
+        && validateString(request.resource.data.article_id, 100)
+        && validateString(request.resource.data.metro_id, 50)
+        && validateTimestamp(request.resource.data.created_at);
+
+      allow delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+
+      allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+    }
+
+    // /reports - create if auth, read admin only
+    match /reports/{reportId} {
+      allow create: if isAuthenticated()
+        && request.resource.data.user_id == request.auth.uid
+        && validateString(request.resource.data.article_id, 100)
+        && validateString(request.resource.data.metro_id, 50)
+        && request.resource.data.reason in ["spam", "offensive", "misinfo", "other"]
+        && validateTimestamp(request.resource.data.created_at);
+
+      allow read: if isAdmin();
+    }
+
+    // /metros - read all, write admin only
+    match /metros/{metroId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // /system - read all, write admin only
+    match /system/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "metro_id", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "publish_time", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "metro_id", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "like_count_24h", "order": "DESCENDING" },
+        { "fieldPath": "publish_time", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "metro_id", "order": "ASCENDING" },
+        { "fieldPath": "is_featured", "order": "ASCENDING" },
+        { "fieldPath": "featured_start", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

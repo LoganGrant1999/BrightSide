@@ -37,6 +37,124 @@ BrightSide is a **mobile-first application** built with:
 └─────────────────────────────────────────────────────────┘
 ```
 
+### Frontend vs Backend File Structure
+
+```
+PROJECT ROOT
+│
+├── 📱 FRONTEND (Flutter/Dart)
+│   │
+│   └── lib/
+│       ├── main.dart                              # App entry point
+│       │
+│       ├── core/                                  # Shared infrastructure
+│       │   ├── config/
+│       │   │   └── environment.dart              # Env config, feature flags
+│       │   ├── theme/
+│       │   │   └── app_theme.dart                # Design system (colors, fonts)
+│       │   ├── utils/
+│       │   │   ├── ui.dart                       # UI helpers (snackbars, dialogs)
+│       │   │   └── geo.dart                      # Location utilities
+│       │   └── router/
+│       │       └── app_router.dart               # Navigation routes
+│       │
+│       ├── shared/                                # Reusable components
+│       │   ├── services/
+│       │   │   ├── firebase_boot.dart            # 🔌 Firebase initialization
+│       │   │   ├── functions_service.dart        # 🔌 Cloud Functions client
+│       │   │   ├── app_router.dart               # Route definitions
+│       │   │   └── issue_cache.dart              # Local data cache
+│       │   └── widgets/
+│       │       ├── story_card.dart               # Reusable story card UI
+│       │       └── metro_picker_dialog.dart      # Metro selection dialog
+│       │
+│       └── features/                              # Feature modules
+│           │
+│           ├── today/                            # Today's stories feature
+│           │   └── today_screen.dart            # UI: Today tab
+│           │
+│           ├── popular/                          # Popular stories feature
+│           │   └── popular_screen.dart          # UI: Popular tab
+│           │
+│           ├── submit/                           # Story submission feature
+│           │   ├── submit_screen.dart           # UI: Submit form
+│           │   └── model/
+│           │       └── submission_fs.dart       # 📦 Firestore submission model
+│           │
+│           ├── story/                            # Core story feature
+│           │   ├── presentation/
+│           │   │   └── story_details_screen.dart # UI: Story detail view
+│           │   ├── providers/
+│           │   │   └── story_providers.dart      # State management
+│           │   ├── data/
+│           │   │   ├── story_repository.dart     # Abstract interface
+│           │   │   ├── story_repository_firebase.dart # 🔌 Firebase impl
+│           │   │   └── http_story_repository.dart # HTTP impl (future)
+│           │   └── model/
+│           │       ├── story.dart                # UI model
+│           │       └── article_fs.dart           # 📦 Firestore article model
+│           │
+│           ├── metro/                            # Metro selection feature
+│           │   ├── metro.dart                   # Metro data model
+│           │   └── metro_provider.dart          # Metro state management
+│           │
+│           ├── auth/                             # Authentication feature
+│           │   ├── providers/
+│           │   │   └── auth_provider.dart       # Auth state management
+│           │   ├── data/
+│           │   │   └── auth_repository.dart     # Auth operations
+│           │   ├── models/
+│           │   │   └── auth_user.dart           # User model
+│           │   └── presentation/
+│           │       └── auth_gate.dart           # Auth route guard
+│           │
+│           ├── settings/                         # Settings feature
+│           │   └── settings_screen.dart         # UI: Settings, debug tools
+│           │
+│           └── profile/                          # User profile feature
+│               └── model/
+│                   └── user_profile_fs.dart     # 📦 Firestore user model
+│
+├── 🔥 BACKEND (Firebase)
+│   │
+│   ├── functions/                                # Cloud Functions (TypeScript)
+│   │   ├── index.ts                             # Backend logic
+│   │   │   ├── likeArticle()                   # Callable: Like/unlike articles
+│   │   │   ├── fixSeedForMetro()               # Callable: Admin seed fix tool
+│   │   │   └── rotateFeaturedDaily()           # Scheduled: Daily featured rotation
+│   │   ├── package.json                         # Node.js dependencies
+│   │   └── tsconfig.json                        # TypeScript config
+│   │
+│   └── firebase/                                 # Firebase config
+│       ├── firestore.rules                      # Security rules
+│       └── firestore.indexes.json               # Database indexes (auto-generated)
+│
+└── 🛠️  TOOLING
+    │
+    ├── tool/
+    │   └── seed_firestore.dart                  # Dev tool: Seed test data
+    │
+    ├── .vscode/                                  # VS Code settings
+    │   ├── settings.json                        # IDE config (iOS-only)
+    │   ├── launch.json                          # Debug config
+    │   └── tasks.json                           # Build tasks
+    │
+    └── pubspec.yaml                              # Flutter dependencies
+
+LEGEND:
+  📱 = Frontend (Flutter mobile app)
+  🔥 = Backend (Firebase serverless)
+  🔌 = Frontend-to-backend connection point
+  📦 = Firestore data model (shared schema knowledge)
+  🛠️  = Development tools
+```
+
+**Key Connection Points (🔌)**:
+- `firebase_boot.dart` → Initializes Firebase SDK, handles auth
+- `functions_service.dart` → Calls Cloud Functions from Flutter
+- `story_repository_firebase.dart` → Queries Firestore, calls Cloud Functions
+- `*_fs.dart` models → Match Firestore document structure
+
 ---
 
 ## Frontend (Flutter/Dart)
