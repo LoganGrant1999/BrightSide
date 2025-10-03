@@ -8,6 +8,8 @@ import 'package:brightside/features/story/model/article_fs.dart';
 import 'package:brightside/features/story/model/story.dart';
 import 'package:brightside/features/story/providers/story_providers.dart';
 import 'package:brightside/features/submit/model/submission_fs.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:brightside/features/metro/metro.dart';
 
 class StoryRepositoryFirebase implements StoryRepository {
   final FirebaseFirestore _firestore;
@@ -30,33 +32,56 @@ class StoryRepositoryFirebase implements StoryRepository {
 
   @override
   Future<List<Story>> fetchToday(String metroId) async {
-    // Compute 24-hour cutoff
-    final cutoff = DateTime.now().toUtc().subtract(const Duration(hours: 24));
+    // Get metro timezone
+    final metro = kMetros.firstWhere((m) => m.id == metroId);
 
-    // Try to get articles from last 24 hours
-    var snapshot = await _firestore
+    // Compute 5am local rolling window
+    final windowStart = _startOfWindowNow(metro.timezone);
+
+    // Query articles published since 5am local time today
+    // (or 5am yesterday if it's currently before 5am)
+    final snapshot = await _firestore
         .collection('articles')
         .where('metroId', isEqualTo: metroId)
         .where('status', isEqualTo: 'published')
-        .where('publishedAt', isGreaterThanOrEqualTo: cutoff)
+        .where('publishedAt', isGreaterThanOrEqualTo: windowStart)
         .orderBy('publishedAt', descending: true)
         .limit(5)
         .get();
 
-    // If no results, fallback to latest 5 published articles for this metro
-    if (snapshot.docs.isEmpty) {
-      snapshot = await _firestore
-          .collection('articles')
-          .where('metroId', isEqualTo: metroId)
-          .where('status', isEqualTo: 'published')
-          .orderBy('publishedAt', descending: true)
-          .limit(5)
-          .get();
-    }
-
     return snapshot.docs
         .map((doc) => _articleToStory(ArticleFs.fromJson(doc.data())))
         .toList();
+  }
+
+  /// Compute the start of the 5am local rolling window
+  ///
+  /// If current time is before 5am, returns 5am yesterday
+  /// If current time is 5am or later, returns 5am today
+  ///
+  /// This ensures the "Today" feed shows articles published since the most recent 5am
+  DateTime _startOfWindowNow(String timezoneId) {
+    final location = tz.getLocation(timezoneId);
+    final now = tz.TZDateTime.now(location);
+
+    // Start with 5am today in the metro's timezone
+    var fiveAmToday = tz.TZDateTime(
+      location,
+      now.year,
+      now.month,
+      now.day,
+      5, // 5am
+      0,
+      0,
+    );
+
+    // If it's currently before 5am, use 5am from yesterday
+    if (now.isBefore(fiveAmToday)) {
+      fiveAmToday = fiveAmToday.subtract(const Duration(days: 1));
+    }
+
+    // Convert to UTC for Firestore query
+    return fiveAmToday.toUtc();
   }
 
   @override

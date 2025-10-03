@@ -63,6 +63,9 @@ dependencies:
   # Internationalization
   intl: ^0.20.1
 
+  # Timezone support
+  timezone: ^0.9.4
+
   # Package info
   package_info_plus: ^8.1.0
 

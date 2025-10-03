@@ -6,9 +6,13 @@ import 'package:brightside/shared/services/app_router.dart';
 import 'package:brightside/shared/services/firebase_boot.dart';
 import 'package:brightside/features/metro/metro_provider.dart';
 import 'package:brightside/core/services/analytics.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize timezone database
+  tz.initializeTimeZones();
 
   // Initialize Firebase
   await initFirebase();

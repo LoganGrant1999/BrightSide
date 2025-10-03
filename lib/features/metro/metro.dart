@@ -4,6 +4,7 @@ class Metro {
   final String id;
   final String name;
   final String state;
+  final String timezone; // IANA timezone identifier (e.g., 'America/Denver')
   final double? latitude;
   final double? longitude;
 
@@ -11,6 +12,7 @@ class Metro {
     required this.id,
     required this.name,
     required this.state,
+    required this.timezone,
     this.latitude,
     this.longitude,
   });
@@ -34,6 +36,7 @@ const kMetros = [
     id: 'slc',
     name: 'Salt Lake City',
     state: 'UT',
+    timezone: 'America/Denver', // Mountain Time
     latitude: 40.7608,
     longitude: -111.8910,
   ),
@@ -41,6 +44,7 @@ const kMetros = [
     id: 'nyc',
     name: 'New York City',
     state: 'NY',
+    timezone: 'America/New_York', // Eastern Time
     latitude: 40.7128,
     longitude: -74.0060,
   ),
@@ -48,6 +52,7 @@ const kMetros = [
     id: 'gsp',
     name: 'Greenville-Spartanburg',
     state: 'SC',
+    timezone: 'America/New_York', // Eastern Time
     latitude: 34.8526,
     longitude: -82.3940,
   ),
