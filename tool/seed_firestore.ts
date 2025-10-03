@@ -4,17 +4,31 @@
  * Seed script for BrightSide Firestore database
  *
  * Usage:
- *   ts-node tool/seed_firestore.ts
- *   OR compile and run: tsc tool/seed_firestore.ts && node tool/seed_firestore.js
+ *   For production: ts-node tool/seed_firestore.ts
+ *   For emulator: FIRESTORE_EMULATOR_HOST="localhost:8080" ts-node tool/seed_firestore.ts
  *
- * Make sure to set FIRESTORE_EMULATOR_HOST if using emulators:
- *   export FIRESTORE_EMULATOR_HOST="localhost:8080"
+ * Requires serviceAccountKey.json in the tool/ directory (get from Firebase Console)
  */
 
-import * as admin from "firebase-admin";
+import admin from "firebase-admin";
+import { readFileSync, existsSync } from "fs";
+import { resolve } from "path";
 
 // Initialize Firebase Admin
-admin.initializeApp();
+const serviceAccountPath = resolve(__dirname, "serviceAccountKey.json");
+
+if (!existsSync(serviceAccountPath)) {
+  console.error("❌ Error: serviceAccountKey.json not found!");
+  console.error("Download it from: https://console.firebase.google.com/project/brightside-9a2c5/settings/serviceaccounts/adminsdk");
+  process.exit(1);
+}
+
+const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, "utf8"));
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  projectId: "brightside-9a2c5",
+});
 const db = admin.firestore();
 
 async function seedMetros() {
