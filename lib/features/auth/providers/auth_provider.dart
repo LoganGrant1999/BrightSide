@@ -293,6 +293,33 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return e.message ?? 'An error occurred';
     }
   }
+
+  // Delete account and all user data
+  Future<void> deleteAccount() async {
+    try {
+      state = state.copyWith(isLoading: true, error: null);
+
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('No user signed in');
+      }
+
+      // Call Cloud Function to delete all user data
+      // This includes: user doc, devices, articleLikes, submissions, analytics
+      await _userService.deleteUserAccount(user.uid);
+
+      // Sign out locally (auth record already deleted by Cloud Function)
+      await signOut();
+
+      state = state.copyWith(isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to delete account: $e',
+      );
+      rethrow;
+    }
+  }
 }
 
 // Auth provider

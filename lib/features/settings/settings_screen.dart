@@ -66,6 +66,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           const Divider(),
 
+          // Notifications section
+          _buildSectionHeader(context, 'Notifications'),
+          ListTile(
+            leading: const Icon(Icons.notifications),
+            title: const Text('Push Notifications'),
+            subtitle: const Text('Daily digest and updates'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              context.push('/settings/notifications');
+            },
+          ),
+          const Divider(),
+
           // Location section
           _buildSectionHeader(context, 'Location'),
           ListTile(
@@ -142,18 +155,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: const Text('Bump publishedAt & ensure status=published'),
               onTap: () async {
                 await _handleFixSeedForMetro(context);
-              },
-            ),
-          if (isSignedIn)
-            ListTile(
-              leading: const Icon(Icons.person_remove, color: AppTheme.errorColor),
-              title: const Text(
-                'Delete Account',
-                style: TextStyle(color: AppTheme.errorColor),
-              ),
-              subtitle: const Text('Permanently delete your account and all data'),
-              onTap: () {
-                _showDeleteAccountConfirmation(context);
               },
             ),
           ListTile(
@@ -283,40 +284,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  void _showDeleteAccountConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text(
-          'This will permanently delete your account and all associated data:\n\n'
-          '• Your account and profile\n'
-          '• Story submissions and likes\n'
-          '• All preferences\n\n'
-          'This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _deleteAccount();
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: AppTheme.errorColor,
-            ),
-            child: const Text('Delete Account'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showDeleteDataConfirmation(BuildContext context) {
     showDialog(
       context: context,
@@ -349,24 +316,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> _deleteAccount() async {
-    try {
-      // Delete account functionality not yet implemented
-      // await ref.read(authProvider.notifier).deleteAccount();
-
-      if (mounted) {
-        UIHelpers.showSuccessSnackBar(
-          context,
-          'Account deleted successfully',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        UIHelpers.handleError(context, e);
-      }
-    }
   }
 
   Future<void> _deleteLocalData() async {

@@ -7,6 +7,9 @@ import { isAdmin } from "./admin";
 import { get24HoursAgo } from "./utils/time";
 import { Article, Submission } from "./types";
 
+// Export deleteAccount callable function
+export { deleteAccount } from "./deleteAccount";
+
 admin.initializeApp();
 const db = admin.firestore();
 

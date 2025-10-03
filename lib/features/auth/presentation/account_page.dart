@@ -110,6 +110,36 @@ class AccountPage extends ConsumerWidget {
                         icon: const Icon(Icons.logout),
                         label: const Text('Sign Out'),
                       ),
+
+                      const SizedBox(height: 32),
+
+                      // Danger zone
+                      Text(
+                        'Danger Zone',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.red[700],
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'This action cannot be undone',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Delete account button
+                      OutlinedButton.icon(
+                        onPressed: () => _showDeleteAccountDialog(context, ref, user.uid),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red[700],
+                          side: BorderSide(color: Colors.red[700]!),
+                        ),
+                        icon: const Icon(Icons.delete_forever),
+                        label: const Text('Delete Account'),
+                      ),
                     ],
                   ),
                 ),
@@ -160,6 +190,130 @@ class AccountPage extends ConsumerWidget {
 
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}/${date.year}';
+  }
+
+  void _showDeleteAccountDialog(BuildContext context, WidgetRef ref, String uid) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.warning, color: Colors.red[700]),
+            const SizedBox(width: 8),
+            const Text('Delete Account?'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This will permanently delete:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            _buildDeleteItem('Your account and profile'),
+            _buildDeleteItem('All story submissions'),
+            _buildDeleteItem('All likes and interactions'),
+            _buildDeleteItem('All devices and notification tokens'),
+            _buildDeleteItem('All preferences and settings'),
+            const SizedBox(height: 12),
+            Text(
+              'This action is immediate and cannot be undone.',
+              style: TextStyle(
+                color: Colors.red[700],
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
+              await _deleteAccount(context, ref, uid);
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red[700],
+            ),
+            child: const Text('Delete My Account'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeleteItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(Icons.close, size: 16, color: Colors.red[700]),
+          const SizedBox(width: 8),
+          Expanded(child: Text(text)),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteAccount(BuildContext context, WidgetRef ref, String uid) async {
+    // Show loading
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Deleting your account...'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      // Call delete account function
+      await ref.read(authProvider.notifier).deleteAccount();
+
+      if (!context.mounted) return;
+
+      // Close loading dialog
+      Navigator.pop(context);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Account deleted successfully'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      // Navigate to onboarding
+      context.go('/onboarding/intro');
+    } catch (e) {
+      if (!context.mounted) return;
+
+      // Close loading dialog
+      Navigator.pop(context);
+
+      // Show error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete account: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
   }
 }
 

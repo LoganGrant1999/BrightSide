@@ -1,11 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../models/app_user.dart';
 
 class UserService {
   final FirebaseFirestore _firestore;
+  final FirebaseFunctions _functions;
 
-  UserService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  UserService({
+    FirebaseFirestore? firestore,
+    FirebaseFunctions? functions,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _functions = functions ?? FirebaseFunctions.instance;
 
   /// Get user by ID
   Future<AppUser?> getUserById(String uid) async {
@@ -89,5 +94,33 @@ class UserService {
   /// Delete user document
   Future<void> deleteUser(String uid) async {
     await _firestore.collection('users').doc(uid).delete();
+  }
+
+  /// Delete user account and all associated data
+  /// Calls Cloud Function to purge all user data including:
+  /// - Auth record
+  /// - User document
+  /// - Devices subcollection
+  /// - Article likes
+  /// - Submissions
+  /// - Analytics (redacted)
+  Future<void> deleteUserAccount(String uid) async {
+    try {
+      // Call the Cloud Function
+      final callable = _functions.httpsCallable('deleteAccount');
+      final result = await callable.call<Map<String, dynamic>>({});
+
+      // Check for success
+      if (result.data['success'] != true) {
+        throw Exception(
+          result.data['message'] ?? 'Failed to delete account',
+        );
+      }
+    } on FirebaseFunctionsException catch (e) {
+      // Handle Firebase Functions errors
+      throw Exception('Delete account error: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to delete account: $e');
+    }
   }
 }
