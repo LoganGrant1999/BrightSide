@@ -6,6 +6,7 @@ import 'package:brightside/features/metro/metro.dart';
 import 'package:brightside/features/metro/metro_provider.dart';
 import 'package:brightside/features/story/providers/story_providers.dart';
 import 'package:brightside/features/auth/providers/auth_provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:brightside/shared/services/functions_service.dart';
 import 'package:brightside/core/theme/app_theme.dart';
 import 'package:brightside/core/utils/ui.dart';
@@ -24,8 +25,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final metroState = ref.watch(metroProvider);
     final authState = ref.watch(authProvider);
-    final isSignedIn = authState.status == AuthStatus.signedIn;
-    final user = authState.user;
+    final isSignedIn = authState.isAuthenticated;
+    final user = authState.appUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -37,21 +38,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildSectionHeader(context, 'Account'),
           if (isSignedIn && user != null)
             ListTile(
-              leading: CircleAvatar(
+              leading: const CircleAvatar(
                 backgroundColor: AppTheme.primaryColor,
-                backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-                child: user.photoUrl == null
-                    ? const Icon(Icons.person, color: Colors.white)
-                    : null,
+                child: Icon(Icons.person, color: Colors.white),
               ),
-              title: Text(user.displayName ?? user.email ?? 'User'),
-              subtitle: Text(user.email ?? 'Signed in with ${user.provider.name}'),
-              trailing: TextButton(
-                onPressed: () async {
-                  await ref.read(authProvider.notifier).signOut();
-                },
-                child: const Text('Sign Out'),
-              ),
+              title: Text(user.displayName ?? user.email),
+              subtitle: Text('Signed in with ${_getProviderName(user.authProvider)}'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                context.push('/auth/account');
+              },
             )
           else
             ListTile(
@@ -63,7 +59,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: const Text('Sign in to save preferences across devices'),
               trailing: TextButton(
                 onPressed: () {
-                  _showComingSoonDialog(context, 'Authentication');
+                  context.push('/auth');
                 },
                 child: const Text('Sign In'),
               ),
@@ -357,7 +353,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _deleteAccount() async {
     try {
-      await ref.read(authProvider.notifier).deleteAccount();
+      // Delete account functionality not yet implemented
+      // await ref.read(authProvider.notifier).deleteAccount();
 
       if (mounted) {
         UIHelpers.showSuccessSnackBar(
@@ -400,6 +397,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (mounted) {
         UIHelpers.handleError(context, e);
       }
+    }
+  }
+
+  String _getProviderName(String provider) {
+    switch (provider) {
+      case 'google':
+        return 'Google';
+      case 'apple':
+        return 'Apple';
+      case 'email':
+        return 'Email/Password';
+      default:
+        return provider;
     }
   }
 

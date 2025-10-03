@@ -6,14 +6,27 @@ import '../../features/onboarding/presentation/location_permission_page.dart';
 import '../../features/onboarding/presentation/metro_picker_page.dart';
 import '../../features/onboarding/presentation/auth_placeholder_page.dart';
 import '../../features/onboarding/providers/onboarding_state_provider.dart';
+import '../../features/auth/presentation/auth_gate_page.dart';
+import '../../features/auth/presentation/email_auth_page.dart';
+import '../../features/auth/presentation/account_page.dart';
+import '../../features/auth/providers/auth_provider.dart';
 
-// Helper class to notify GoRouter when onboarding state changes
-class _OnboardingRefreshNotifier extends ChangeNotifier {
-  _OnboardingRefreshNotifier(this.ref) {
+// Helper class to notify GoRouter when onboarding or auth state changes
+class _AppRefreshNotifier extends ChangeNotifier {
+  _AppRefreshNotifier(this.ref) {
     ref.listen<OnboardingState>(
       onboardingStateProvider,
       (previous, next) {
         if (previous?.isCompleted != next.isCompleted) {
+          notifyListeners();
+        }
+      },
+    );
+
+    ref.listen<AuthState>(
+      authProvider,
+      (previous, next) {
+        if (previous?.isAuthenticated != next.isAuthenticated) {
           notifyListeners();
         }
       },
@@ -70,22 +83,33 @@ class SettingsScreen extends StatelessWidget {
 
 // Router configuration
 final goRouterProvider = Provider<GoRouter>((ref) {
-  // Watch onboarding state to trigger rebuilds
+  // Watch onboarding and auth state to trigger rebuilds
   final onboardingState = ref.watch(onboardingStateProvider);
+  final authState = ref.watch(authProvider);
 
   return GoRouter(
     initialLocation: '/today',
-    refreshListenable: _OnboardingRefreshNotifier(ref),
+    refreshListenable: _AppRefreshNotifier(ref),
     redirect: (context, state) {
       final isOnboardingRoute = state.matchedLocation.startsWith('/onboarding');
+      final isAuthRoute = state.matchedLocation.startsWith('/auth');
+      final isAuthenticated = authState.isAuthenticated;
 
-      // If onboarding not completed and not already on onboarding, redirect
-      if (!onboardingState.isCompleted && !isOnboardingRoute) {
+      // If onboarding not completed and not already on onboarding/auth, redirect
+      if (!onboardingState.isCompleted && !isOnboardingRoute && !isAuthRoute) {
         return '/onboarding/intro';
       }
 
-      // If onboarding completed and trying to access onboarding, redirect to today
-      if (onboardingState.isCompleted && isOnboardingRoute) {
+      // If onboarding completed but not authenticated, allow auth routes
+      if (onboardingState.isCompleted &&
+          !isAuthenticated &&
+          !isAuthRoute &&
+          !isOnboardingRoute) {
+        return '/onboarding/auth';
+      }
+
+      // If authenticated and trying to access onboarding/auth, redirect to today
+      if (isAuthenticated && (isOnboardingRoute || isAuthRoute)) {
         return '/today';
       }
 
@@ -112,6 +136,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/onboarding/auth',
         name: 'onboarding-auth',
         builder: (context, state) => const AuthPlaceholderPage(),
+      ),
+      // Auth routes
+      GoRoute(
+        path: '/auth',
+        name: 'auth',
+        builder: (context, state) => const AuthGatePage(),
+      ),
+      GoRoute(
+        path: '/auth/email',
+        name: 'auth-email',
+        builder: (context, state) => const EmailAuthPage(),
+      ),
+      GoRoute(
+        path: '/auth/account',
+        name: 'auth-account',
+        builder: (context, state) => const AccountPage(),
       ),
       // Main app routes
       GoRoute(
