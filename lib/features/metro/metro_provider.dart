@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brightside/features/metro/metro.dart';
+import 'package:brightside/core/services/analytics.dart';
 
 class MetroState {
   final String metroId;
@@ -108,6 +109,10 @@ class MetroNotifier extends StateNotifier<MetroState> {
   Future<void> _setMetro(String metroId) async {
     state = state.copyWith(metroId: metroId);
     await _prefs.setString(_storageKey, metroId);
+
+    // Log analytics event
+    await AnalyticsService.logMetroSet(metroId);
+    await AnalyticsService.setUserMetro(metroId);
   }
 }
 

@@ -6,6 +6,7 @@ import 'package:brightside/features/story/model/story.dart';
 import 'package:brightside/features/story/providers/story_providers.dart';
 import 'package:brightside/core/theme/app_theme.dart';
 import 'package:brightside/core/utils/ui.dart';
+import 'package:brightside/core/services/analytics.dart';
 
 export 'package:brightside/features/story/providers/story_providers.dart' show LikeBlockedFeaturedException;
 
@@ -185,6 +186,11 @@ class _StoryCardState extends ConsumerState<StoryCard> {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
+          // Log analytics event
+          AnalyticsService.logArticleOpen(
+            articleId: widget.story.id,
+            metroId: widget.story.metroId,
+          );
           context.push('/story/${widget.story.id}');
         },
         child: Column(

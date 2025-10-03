@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:brightside/core/services/analytics.dart';
 
 class NotificationService {
   final FirebaseMessaging _messaging;
@@ -147,10 +148,14 @@ class NotificationService {
     debugPrint('Notification tapped: ${message.messageId}');
 
     // Log analytics event
+    final metroId = message.data['metro_id'] ?? 'unknown';
+    AnalyticsService.logNotificationOpen(metroId);
+
+    // Also log detailed analytics
     _analytics.logEvent(
-      name: 'notif_open',
+      name: 'notif_open_detailed',
       parameters: {
-        'metro_id': message.data['metro_id'] ?? 'unknown',
+        'metro_id': metroId,
         'notification_type': message.data['type'] ?? 'daily_digest',
         'message_id': message.messageId ?? 'unknown',
       },

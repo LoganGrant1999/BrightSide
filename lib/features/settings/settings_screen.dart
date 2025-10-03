@@ -10,6 +10,9 @@ import 'package:go_router/go_router.dart';
 import 'package:brightside/shared/services/functions_service.dart';
 import 'package:brightside/core/theme/app_theme.dart';
 import 'package:brightside/core/utils/ui.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -20,6 +23,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _useDeviceLocation = false;
+  int _versionTapCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -158,9 +162,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // App info
           _buildSectionHeader(context, 'About'),
           ListTile(
+            leading: const Icon(Icons.email),
+            title: const Text('Support'),
+            subtitle: const Text('Contact us for help'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              _openSupportEmail(context);
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.info),
             title: const Text('Version'),
             subtitle: const Text('1.0.0'),
+            onTap: () {
+              _handleVersionTap();
+            },
           ),
           const SizedBox(height: AppTheme.paddingLarge),
         ],
@@ -344,6 +360,97 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         return 'Email/Password';
       default:
         return provider;
+    }
+  }
+
+  /// Open support email with prefilled metadata
+  Future<void> _openSupportEmail(BuildContext context) async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      final metroState = ref.read(metroProvider);
+      final authState = ref.read(authProvider);
+      final uid = authState.appUser?.uid ?? 'not-signed-in';
+
+      final subject = Uri.encodeComponent('BrightSide Support Request');
+      final body = Uri.encodeComponent(
+        'Please describe your issue:\n\n\n\n'
+        '---\n'
+        'App Version: ${packageInfo.version}\n'
+        'Build: ${packageInfo.buildNumber}\n'
+        'User ID: $uid\n'
+        'Metro: ${metroState.metroId}\n',
+      );
+
+      final uri = Uri.parse('mailto:support@brightside.com?subject=$subject&body=$body');
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        if (context.mounted) {
+          UIHelpers.showErrorSnackBar(
+            context,
+            'Could not open email client',
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        UIHelpers.showErrorSnackBar(
+          context,
+          'Error opening support email: $e',
+        );
+      }
+    }
+  }
+
+  /// Handle version tap (7 taps triggers test crash in debug mode)
+  void _handleVersionTap() {
+    if (!kDebugMode) return;
+
+    setState(() {
+      _versionTapCount++;
+    });
+
+    if (_versionTapCount >= 7) {
+      // Reset counter
+      setState(() {
+        _versionTapCount = 0;
+      });
+
+      // Show confirmation dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Debug: Test Crash'),
+          content: const Text(
+            'This will trigger a test crash for Crashlytics. The app will restart.\n\n'
+            'This only works in debug mode.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // Trigger a test crash
+                FirebaseCrashlytics.instance.crash();
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.red[700],
+              ),
+              child: const Text('Crash Now'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Show tap count hint
+      UIHelpers.showInfoSnackBar(
+        context,
+        'Tapped $_versionTapCount/7 times',
+      );
     }
   }
 
