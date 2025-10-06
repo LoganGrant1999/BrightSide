@@ -140,12 +140,29 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
     await _service.initialize(
       userId: authState.appUser!.uid,
       onMessageReceived: _handleForegroundMessage,
+      onNotificationTap: _handleNotificationTap,
     );
 
     // Subscribe to metro topic if enabled
     if (state.isEnabled && state.currentMetro != null) {
       await _service.subscribeToMetroTopic(state.currentMetro!);
     }
+  }
+
+  /// Handle notification tap and navigate
+  void _handleNotificationTap(RemoteMessage message) {
+    // Navigation will be handled by main.dart using router
+    // Store the message data for the router to consume
+    _pendingNotification = message;
+  }
+
+  RemoteMessage? _pendingNotification;
+
+  /// Get and clear pending notification (called by router)
+  RemoteMessage? getPendingNotification() {
+    final message = _pendingNotification;
+    _pendingNotification = null;
+    return message;
   }
 
   /// Handle foreground messages

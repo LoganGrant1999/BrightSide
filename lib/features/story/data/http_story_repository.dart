@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brightside/features/story/model/story.dart';
 import 'package:brightside/features/story/data/story_repository.dart';
@@ -41,19 +42,19 @@ class HttpStoryRepository implements StoryRepository {
 
   /// Setup Dio interceptors for logging and retries
   void _setupInterceptors() {
-    // Logging interceptor
-    _dio.interceptors.add(
-      LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-        error: true,
-        logPrint: (obj) {
-          // In production, replace with proper logging
-          // ignore: avoid_print
-          print('[HTTP] $obj');
-        },
-      ),
-    );
+    // Logging interceptor (only in debug/dev mode)
+    if (!kReleaseMode) {
+      _dio.interceptors.add(
+        LogInterceptor(
+          requestBody: true,
+          responseBody: true,
+          error: true,
+          logPrint: (obj) {
+            debugPrint('[HTTP] $obj');
+          },
+        ),
+      );
+    }
 
     // Retry interceptor
     _dio.interceptors.add(

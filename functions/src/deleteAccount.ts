@@ -50,11 +50,11 @@ export const deleteAccount = functions.https.onCall(async (data, context) => {
     console.log(`Deleted devices subcollection for user: ${uid}`);
 
     // Step 3: Delete article likes
-    await deleteDocumentsWhere("articleLikes", "user_id", uid, 100);
+    await deleteDocumentsWhere("articleLikes", "userId", uid, 100);
     console.log(`Deleted article likes for user: ${uid}`);
 
     // Step 4: Delete user submissions
-    await deleteDocumentsWhere("submissions", "user_id", uid, 100);
+    await deleteDocumentsWhere("submissions", "submittedByUid", uid, 100);
     console.log(`Deleted submissions for user: ${uid}`);
 
     // Step 5: Redact analytics (optional - set user_id to 'deleted')

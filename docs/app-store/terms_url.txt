@@ -1,0 +1,23 @@
+PLACEHOLDER - Replace before App Store submission
+
+Terms of Service URL: https://brightside.com/terms
+
+TODO:
+1. Create terms of service page at this URL
+2. Include sections on:
+   - User responsibilities
+   - Content guidelines (positive news only)
+   - Prohibited uses
+   - User-submitted content rights
+   - Content moderation policy
+   - Account termination conditions
+   - Disclaimer of warranties
+   - Limitation of liability
+   - Governing law
+   - Contact information
+
+3. Host at a publicly accessible URL
+4. Update this file with the final URL
+5. Add URL to App Store Connect before submission
+
+Reference template: https://www.termsfeed.com/blog/sample-terms-of-service-template/

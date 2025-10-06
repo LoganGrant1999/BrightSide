@@ -10,6 +10,35 @@ import { Article, Submission } from "./types";
 // Export deleteAccount callable function
 export { deleteAccount } from "./deleteAccount";
 
+// Export scheduled ingestion functions
+export { ingestSlc, ingestNyc, ingestGsp } from "./schedules";
+
+// Export scheduled digest functions
+export { digestSlc, digestNyc, digestGsp } from "./schedules";
+
+// Export scheduled featured rotation functions
+export { rotateFeaturedSlc, rotateFeaturedNyc, rotateFeaturedGsp } from "./schedules";
+
+// Export moderation callable functions
+export { approveSubmission, rejectSubmission } from "./moderation";
+
+// Export feature article callable function
+export { featureArticle } from "./featureArticle";
+
+// Export notification functions (legacy v1 schedulers)
+export {
+  slcDailyDigest,
+  nycDailyDigest,
+  gspDailyDigest,
+  sendTestDigest,
+} from "./notifications";
+
+// Export test push notification function
+export { sendTestPush } from "./notifications/sendTestPush";
+
+// Export test ingestion HTTP function
+export { testIngest } from "./testIngest";
+
 admin.initializeApp();
 const db = admin.firestore();
 

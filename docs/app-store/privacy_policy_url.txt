@@ -1,0 +1,21 @@
+PLACEHOLDER - Replace before App Store submission
+
+Privacy Policy URL: https://brightside.com/privacy
+
+TODO:
+1. Create privacy policy page at this URL
+2. Include sections on:
+   - Data collection (minimal: email, metro preference, device tokens)
+   - Firebase services usage
+   - Push notification permissions
+   - Location services (optional, for metro detection)
+   - Third-party services (Firebase, Google Sign-In, Apple Sign-In)
+   - Data retention and deletion
+   - User rights (GDPR, CCPA compliance)
+   - Contact information
+
+3. Host at a publicly accessible URL
+4. Update this file with the final URL
+5. Add URL to App Store Connect before submission
+
+Reference template: https://www.freeprivacypolicy.com/blog/privacy-policy-template/

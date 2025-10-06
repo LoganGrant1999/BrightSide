@@ -5,6 +5,7 @@ import 'package:brightside/features/today/today_screen.dart';
 import 'package:brightside/features/popular/popular_screen.dart';
 import 'package:brightside/features/submit/submit_screen.dart';
 import 'package:brightside/features/settings/settings_screen.dart';
+import 'package:brightside/features/settings/legal_page.dart';
 import 'package:brightside/features/story/presentation/story_details_screen.dart';
 
 
@@ -132,6 +133,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final storyId = state.pathParameters['id'] ?? '';
           return StoryDetailsScreen(storyId: storyId);
         },
+      ),
+      // Legal page
+      GoRoute(
+        path: '/settings/legal',
+        name: 'legal',
+        builder: (context, state) => const LegalPage(),
       ),
     ],
   );

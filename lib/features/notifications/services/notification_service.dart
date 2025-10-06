@@ -20,19 +20,27 @@ class NotificationService {
         _analytics = analytics ?? FirebaseAnalytics.instance;
 
   /// Initialize FCM and set up listeners
+  /// Note: Does NOT request permission - call requestPermissionAndSave separately
   Future<void> initialize({
     required String? userId,
     required Function(RemoteMessage) onMessageReceived,
+    Function(RemoteMessage)? onNotificationTap,
+    bool autoRequestPermission = false,
   }) async {
     if (userId == null) return;
 
-    // Request permission
-    await requestPermission();
+    // Only request permission if explicitly requested (e.g., from Settings)
+    if (autoRequestPermission) {
+      await requestPermission();
+    }
 
-    // Get token
-    final token = await getToken();
-    if (token != null) {
-      await _saveDeviceToken(userId, token);
+    // Get token if we already have permission
+    final hasPermission = await this.hasPermission();
+    if (hasPermission) {
+      final token = await getToken();
+      if (token != null) {
+        await _saveDeviceToken(userId, token);
+      }
     }
 
     // Listen for token refresh
@@ -46,13 +54,32 @@ class NotificationService {
     // Handle notification taps (app in background/terminated)
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       _handleNotificationTap(message);
+      onNotificationTap?.call(message);
     });
 
     // Check if app was opened from a notification
     final initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
       _handleNotificationTap(initialMessage);
+      onNotificationTap?.call(initialMessage);
     }
+  }
+
+  /// Request permission and save device token
+  /// Call this after first feed load (soft-ask)
+  Future<bool> requestPermissionAndSave(String userId) async {
+    final settings = await requestPermission();
+    final hasPermission = settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional;
+
+    if (hasPermission) {
+      final token = await getToken();
+      if (token != null) {
+        await _saveDeviceToken(userId, token);
+      }
+    }
+
+    return hasPermission;
   }
 
   /// Request notification permission
@@ -148,21 +175,25 @@ class NotificationService {
     debugPrint('Notification tapped: ${message.messageId}');
 
     // Log analytics event
-    final metroId = message.data['metro_id'] ?? 'unknown';
-    AnalyticsService.logNotificationOpen(metroId);
+    final metroId = message.data['metroId'] ?? message.data['metro_id'] ?? 'unknown';
+    final articleId = message.data['articleId'];
+
+    AnalyticsService.logNotificationOpen(
+      metroId: metroId,
+      articleId: articleId,
+    );
 
     // Also log detailed analytics
     _analytics.logEvent(
-      name: 'notif_open_detailed',
+      name: 'notif_open',
       parameters: {
         'metro_id': metroId,
+        'article_id': articleId ?? 'none',
         'notification_type': message.data['type'] ?? 'daily_digest',
         'message_id': message.messageId ?? 'unknown',
+        'route': message.data['route'] ?? 'unknown',
       },
     );
-
-    // TODO: Navigate to appropriate screen based on message.data['route']
-    // This will be handled by the app's navigation system
   }
 
   /// Delete device token (on sign out)

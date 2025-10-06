@@ -1,5 +1,29 @@
 {
   "projects": {
-    "default": "brightside-9a2c5"
+    "default": "brightside-9a2c5",
+    "dev": "brightside-dev",
+    "prod": "brightside-9a2c5"
+  },
+  "targets": {
+    "brightside-9a2c5": {
+      "hosting": {
+        "admin": [
+          "brightside-9a2c5-admin"
+        ],
+        "legal": [
+          "brightside-9a2c5"
+        ]
+      }
+    },
+    "brightside-dev": {
+      "hosting": {
+        "admin": [
+          "brightside-dev-admin"
+        ],
+        "legal": [
+          "brightside-dev"
+        ]
+      }
+    }
   }
 }

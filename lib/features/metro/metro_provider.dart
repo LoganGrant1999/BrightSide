@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brightside/features/metro/metro.dart';
 import 'package:brightside/core/services/analytics.dart';
+import 'package:brightside/features/notifications/providers/notification_provider.dart';
 
 class MetroState {
   final String metroId;
@@ -33,8 +34,9 @@ class MetroNotifier extends StateNotifier<MetroState> {
   static const String _storageKey = 'selected_metro_id';
   static const String _firstLaunchKey = 'has_launched_before';
   final SharedPreferences _prefs;
+  final Ref _ref;
 
-  MetroNotifier(this._prefs)
+  MetroNotifier(this._prefs, this._ref)
       : super(MetroState(
           metroId: _prefs.getString(_storageKey) ?? 'slc',
         ));
@@ -107,12 +109,24 @@ class MetroNotifier extends StateNotifier<MetroState> {
 
   /// Internal method to set metro and persist to storage
   Future<void> _setMetro(String metroId) async {
+    final oldMetroId = state.metroId;
     state = state.copyWith(metroId: metroId);
     await _prefs.setString(_storageKey, metroId);
 
     // Log analytics event
     await AnalyticsService.logMetroSet(metroId);
     await AnalyticsService.setUserMetro(metroId);
+
+    // Update notification topic subscription if metro changed
+    if (oldMetroId != metroId) {
+      try {
+        // Import is lazy to avoid circular dependency
+        final notificationNotifier = _ref.read(notificationProvider.notifier);
+        await notificationNotifier.updateMetroSubscription(metroId);
+      } catch (e) {
+        // Silently fail - notification subscription is not critical
+      }
+    }
   }
 }
 
@@ -124,5 +138,5 @@ final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
 // Metro state provider
 final metroProvider = StateNotifierProvider<MetroNotifier, MetroState>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
-  return MetroNotifier(prefs);
+  return MetroNotifier(prefs, ref);
 });

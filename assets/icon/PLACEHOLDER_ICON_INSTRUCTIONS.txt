@@ -1,0 +1,27 @@
+PLACEHOLDER ICON NOTICE
+=======================
+
+The current icon files (app_icon.png and app_icon_foreground.png) are placeholders.
+
+To create production-ready icons:
+
+1. Design a 1024x1024px icon with a sun glyph
+2. Export as PNG with:
+   - app_icon.png: White background, sun in warm yellow (#FFB800)
+   - app_icon_foreground.png: Transparent background, sun centered
+
+3. Run icon generation:
+   flutter pub run flutter_launcher_icons:main
+
+4. Commit the generated icons to git
+
+For quick prototyping, you can use:
+- https://icon.kitchen (online generator)
+- Canva (simple design tool)
+- Or create a simple SVG and convert to PNG
+
+Recommended sun design:
+- Circle in center (represents sun)
+- 8-12 radiating rays
+- Minimalist, friendly style
+- High contrast for visibility at small sizes

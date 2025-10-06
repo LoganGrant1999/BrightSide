@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.promoteSubmission = exports.rotateFeaturedDaily = exports.onLikeDeleted = exports.onLikeCreated = void 0;
+exports.promoteSubmission = exports.rotateFeaturedDaily = exports.onLikeDeleted = exports.onLikeCreated = exports.testIngest = exports.sendTestPush = exports.sendTestDigest = exports.gspDailyDigest = exports.nycDailyDigest = exports.slcDailyDigest = exports.featureArticle = exports.rejectSubmission = exports.approveSubmission = exports.rotateFeaturedGsp = exports.rotateFeaturedNyc = exports.rotateFeaturedSlc = exports.digestGsp = exports.digestNyc = exports.digestSlc = exports.ingestGsp = exports.ingestNyc = exports.ingestSlc = exports.deleteAccount = void 0;
 const admin = __importStar(require("firebase-admin"));
 const functions = __importStar(require("firebase-functions"));
 const firestore_1 = require("firebase-functions/v2/firestore");
@@ -41,6 +41,43 @@ const scheduler_1 = require("firebase-functions/v2/scheduler");
 const https_1 = require("firebase-functions/v2/https");
 const admin_1 = require("./admin");
 const time_1 = require("./utils/time");
+// Export deleteAccount callable function
+var deleteAccount_1 = require("./deleteAccount");
+Object.defineProperty(exports, "deleteAccount", { enumerable: true, get: function () { return deleteAccount_1.deleteAccount; } });
+// Export scheduled ingestion functions
+var schedules_1 = require("./schedules");
+Object.defineProperty(exports, "ingestSlc", { enumerable: true, get: function () { return schedules_1.ingestSlc; } });
+Object.defineProperty(exports, "ingestNyc", { enumerable: true, get: function () { return schedules_1.ingestNyc; } });
+Object.defineProperty(exports, "ingestGsp", { enumerable: true, get: function () { return schedules_1.ingestGsp; } });
+// Export scheduled digest functions
+var schedules_2 = require("./schedules");
+Object.defineProperty(exports, "digestSlc", { enumerable: true, get: function () { return schedules_2.digestSlc; } });
+Object.defineProperty(exports, "digestNyc", { enumerable: true, get: function () { return schedules_2.digestNyc; } });
+Object.defineProperty(exports, "digestGsp", { enumerable: true, get: function () { return schedules_2.digestGsp; } });
+// Export scheduled featured rotation functions
+var schedules_3 = require("./schedules");
+Object.defineProperty(exports, "rotateFeaturedSlc", { enumerable: true, get: function () { return schedules_3.rotateFeaturedSlc; } });
+Object.defineProperty(exports, "rotateFeaturedNyc", { enumerable: true, get: function () { return schedules_3.rotateFeaturedNyc; } });
+Object.defineProperty(exports, "rotateFeaturedGsp", { enumerable: true, get: function () { return schedules_3.rotateFeaturedGsp; } });
+// Export moderation callable functions
+var moderation_1 = require("./moderation");
+Object.defineProperty(exports, "approveSubmission", { enumerable: true, get: function () { return moderation_1.approveSubmission; } });
+Object.defineProperty(exports, "rejectSubmission", { enumerable: true, get: function () { return moderation_1.rejectSubmission; } });
+// Export feature article callable function
+var featureArticle_1 = require("./featureArticle");
+Object.defineProperty(exports, "featureArticle", { enumerable: true, get: function () { return featureArticle_1.featureArticle; } });
+// Export notification functions (legacy v1 schedulers)
+var notifications_1 = require("./notifications");
+Object.defineProperty(exports, "slcDailyDigest", { enumerable: true, get: function () { return notifications_1.slcDailyDigest; } });
+Object.defineProperty(exports, "nycDailyDigest", { enumerable: true, get: function () { return notifications_1.nycDailyDigest; } });
+Object.defineProperty(exports, "gspDailyDigest", { enumerable: true, get: function () { return notifications_1.gspDailyDigest; } });
+Object.defineProperty(exports, "sendTestDigest", { enumerable: true, get: function () { return notifications_1.sendTestDigest; } });
+// Export test push notification function
+var sendTestPush_1 = require("./notifications/sendTestPush");
+Object.defineProperty(exports, "sendTestPush", { enumerable: true, get: function () { return sendTestPush_1.sendTestPush; } });
+// Export test ingestion HTTP function
+var testIngest_1 = require("./testIngest");
+Object.defineProperty(exports, "testIngest", { enumerable: true, get: function () { return testIngest_1.testIngest; } });
 admin.initializeApp();
 const db = admin.firestore();
 /**

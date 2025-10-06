@@ -39,7 +39,8 @@ service cloud.firestore {
         && request.resource.data.status == "pending"
         && validateTimestamp(request.resource.data.created_at);
 
-      allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+      allow read: if isAuthenticated()
+        && (resource.data.user_id == request.auth.uid || isAdmin());
 
       allow update: if isAuthenticated()
         && resource.data.user_id == request.auth.uid
@@ -63,7 +64,7 @@ service cloud.firestore {
 
     // /articleLikes/{uid_articleId} - create/delete own likes
     match /articleLikes/{likeId} {
-      allow create: if isAuthenticated()
+      allow create, update: if isAuthenticated()
         && request.resource.data.user_id == request.auth.uid
         && validateString(request.resource.data.article_id, 100)
         && validateString(request.resource.data.metro_id, 50)

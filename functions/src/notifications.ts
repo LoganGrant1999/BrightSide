@@ -49,10 +49,15 @@ export async function sendMetroDaily(
       return;
     }
 
-    const articles = articlesSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const articles = articlesSnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        title: data.title as string,
+        metro_id: data.metro_id as string,
+        publish_time: data.publish_time,
+      };
+    });
 
     // Build notification title and body
     const articleCount = articles.length;

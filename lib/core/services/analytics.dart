@@ -48,14 +48,18 @@ class AnalyticsService {
 
   /// Log notification open event
   /// Called when user taps a push notification
-  static Future<void> logNotificationOpen(String metroId) async {
+  static Future<void> logNotificationOpen({
+    required String metroId,
+    String? articleId,
+  }) async {
     if (kDebugMode) {
-      debugPrint('[Analytics] notif_open: $metroId');
+      debugPrint('[Analytics] notif_open: metro=$metroId, article=${articleId ?? "none"}');
     }
     await _analytics.logEvent(
       name: 'notif_open',
       parameters: {
         'metro_id': metroId,
+        if (articleId != null) 'article_id': articleId,
       },
     );
   }

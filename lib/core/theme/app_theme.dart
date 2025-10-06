@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:brightside/core/theme/brand_colors.dart';
 
 class AppTheme {
   // Private constructor to prevent instantiation
   AppTheme._();
 
-  // Colors
-  static const Color primaryColor = Color(0xFF2196F3);
-  static const Color secondaryColor = Color(0xFF03DAC6);
-  static const Color backgroundColor = Color(0xFFFFFFFF);
-  static const Color surfaceColor = Color(0xFFF5F5F5);
-  static const Color errorColor = Color(0xFFB00020);
+  // Colors (using BrandColors)
+  static const Color primaryColor = BrandColors.primary;
+  static const Color secondaryColor = BrandColors.secondary;
+  static const Color backgroundColor = BrandColors.white;
+  static const Color surfaceColor = BrandColors.gray100;
+  static const Color errorColor = BrandColors.error;
 
   // Text colors
-  static const Color textPrimaryColor = Color(0xFF212121);
-  static const Color textSecondaryColor = Color(0xFF757575);
+  static const Color textPrimaryColor = BrandColors.textPrimary;
+  static const Color textSecondaryColor = BrandColors.textSecondary;
 
   // Spacing
   static const double paddingXSmall = 4.0;

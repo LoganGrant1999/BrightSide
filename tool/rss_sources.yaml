@@ -1,0 +1,105 @@
+# RSS Feed Sources Configuration
+# 
+# Each metro has 3-5 curated RSS feeds for positive news ingestion
+# Format: metro_id -> sources (array of source configs)
+#
+# Source fields:
+#   - name: Display name (shown in app)
+#   - url: RSS feed URL
+#   - category: primary, secondary, or supplemental
+#   - enabled: true/false (for easy enable/disable)
+
+metros:
+  slc:
+    name: "Salt Lake City"
+    timezone: "America/Denver"
+    sources:
+      - name: "KSL Good News"
+        url: "https://www.ksl.com/rss/news/good-news"
+        category: "primary"
+        enabled: true
+        
+      - name: "Deseret News Utah"
+        url: "https://www.deseret.com/utah/rss"
+        category: "primary"
+        enabled: true
+        
+      - name: "Salt Lake Tribune Local"
+        url: "https://www.sltrib.com/feed/"
+        category: "primary"
+        enabled: true
+        
+      - name: "Good News Network"
+        url: "https://www.goodnewsnetwork.org/feed/"
+        category: "supplemental"
+        enabled: true
+        
+      - name: "Positive News"
+        url: "https://www.positive.news/feed/"
+        category: "supplemental"
+        enabled: false
+
+  nyc:
+    name: "New York City"
+    timezone: "America/New_York"
+    sources:
+      - name: "Gothamist NYC"
+        url: "https://gothamist.com/feed"
+        category: "primary"
+        enabled: true
+        
+      - name: "NY1 News"
+        url: "https://www.ny1.com/services/contentfeed/rss/All/All"
+        category: "primary"
+        enabled: true
+        
+      - name: "amNY"
+        url: "https://www.amny.com/feed/"
+        category: "primary"
+        enabled: true
+        
+      - name: "Good News Network"
+        url: "https://www.goodnewsnetwork.org/feed/"
+        category: "supplemental"
+        enabled: true
+        
+      - name: "The City NYC"
+        url: "https://www.thecity.nyc/feed"
+        category: "secondary"
+        enabled: false
+
+  gsp:
+    name: "Greenville-Spartanburg"
+    timezone: "America/New_York"
+    sources:
+      - name: "Greenville News"
+        url: "https://www.greenvilleonline.com/rss/news/"
+        category: "primary"
+        enabled: true
+        
+      - name: "Spartanburg Herald-Journal"
+        url: "https://www.goupstate.com/rss/news/"
+        category: "primary"
+        enabled: true
+        
+      - name: "WYFF4 Upstate"
+        url: "https://www.wyff4.com/rss"
+        category: "primary"
+        enabled: true
+        
+      - name: "Good News Network"
+        url: "https://www.goodnewsnetwork.org/feed/"
+        category: "supplemental"
+        enabled: true
+        
+      - name: "Positive News"
+        url: "https://www.positive.news/feed/"
+        category: "supplemental"
+        enabled: false
+
+# Notes:
+# - "primary" sources are local news outlets for the metro
+# - "supplemental" sources are national positive news feeds (shared across metros)
+# - "secondary" sources are additional local sources (can be enabled later)
+# - Update URLs with actual working RSS feeds before production use
+# - Test each feed URL to ensure it returns valid RSS/Atom XML

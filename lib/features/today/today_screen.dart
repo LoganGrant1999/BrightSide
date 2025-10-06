@@ -6,12 +6,20 @@ import 'package:brightside/features/story/providers/story_providers.dart';
 import 'package:brightside/shared/widgets/story_card.dart';
 import 'package:brightside/core/theme/app_theme.dart';
 import 'package:brightside/core/utils/ui.dart';
+import 'package:brightside/features/notifications/providers/notification_soft_ask_provider.dart';
 
-class TodayScreen extends ConsumerWidget {
+class TodayScreen extends ConsumerStatefulWidget {
   const TodayScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TodayScreen> createState() => _TodayScreenState();
+}
+
+class _TodayScreenState extends ConsumerState<TodayScreen> {
+  bool _hasMarkedFirstFeedSeen = false;
+
+  @override
+  Widget build(BuildContext context) {
     final metroState = ref.watch(metroProvider);
     final metroId = metroState.metroId;
     final storiesAsync = ref.watch(todayStoriesProvider(metroId));
@@ -67,6 +75,14 @@ class TodayScreen extends ConsumerWidget {
       ),
       body: storiesAsync.when(
         data: (stories) {
+          // Mark first feed as seen (triggers soft-ask for notifications)
+          if (!_hasMarkedFirstFeedSeen && stories.isNotEmpty) {
+            _hasMarkedFirstFeedSeen = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(notificationSoftAskProvider.notifier).markFirstFeedSeen();
+            });
+          }
+
           if (stories.isEmpty) {
             return _buildEmptyState(context);
           }

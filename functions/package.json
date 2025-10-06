@@ -13,15 +13,21 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
+    "deploy:dev": "firebase use dev && npm run build && firebase deploy --only functions",
+    "deploy:prod": "firebase use prod && npm run build && firebase deploy --only functions",
     "logs": "firebase functions:log",
+    "logs:dev": "firebase use dev && firebase functions:log",
+    "logs:prod": "firebase use prod && firebase functions:log",
     "lint": "eslint --ext .js,.ts .",
     "lint:fix": "eslint --ext .js,.ts . --fix",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:rules": "jest test/rules.test.ts --testTimeout=10000"
   },
   "dependencies": {
     "firebase-admin": "^12.0.0",
-    "firebase-functions": "^5.0.0"
+    "firebase-functions": "^5.0.0",
+    "rss-parser": "^3.13.0"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.0",

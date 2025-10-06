@@ -22,6 +22,14 @@ class FunctionsService {
     final map = res.data as Map;
     return (map['updatedCount'] as num).toInt();
   }
+
+  /// Send test push notification to current user's devices
+  /// Returns result with success count and failure count
+  Future<Map<String, dynamic>> sendTestPush() async {
+    final callable = _functions.httpsCallable('sendTestPush');
+    final res = await callable.call();
+    return Map<String, dynamic>.from(res.data as Map);
+  }
 }
 
 /// Provider for FunctionsService

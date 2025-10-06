@@ -7,7 +7,10 @@
     "seed": "ts-node seed_firestore.ts"
   },
   "dependencies": {
-    "firebase-admin": "^12.0.0"
+    "@types/js-yaml": "^4.0.9",
+    "firebase-admin": "^12.0.0",
+    "js-yaml": "^4.1.0",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
